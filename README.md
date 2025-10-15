@@ -1,6 +1,8 @@
 # AIComm Inspection Project Analytics
 
-Comprehensive analysis and optimization documentation for the AIComm Inspection FlutterFlow project, focusing on GCP resource optimization, Cloud Functions analysis, and storage cost reduction strategies.
+**Private Repository** - Comprehensive analysis and optimization documentation for the AIComm Inspection FlutterFlow project, focusing on GCP resource optimization, Cloud Functions analysis, and storage cost reduction strategies.
+
+> **Note**: This is a private repository containing sensitive project analysis and cost optimization strategies.
 
 ## 📊 Analysis Overview
 
