@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GCP Storage Optimization - AIComm Inspection Analytics</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 3px solid #27ae60;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #34495e;
+            margin-top: 30px;
+            border-left: 4px solid #27ae60;
+            padding-left: 15px;
+        }
+        h3 {
+            color: #2c3e50;
+            margin-top: 25px;
+        }
+        .back-link {
+            display: inline-block;
+            background: #3498db;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .back-link:hover {
+            background: #2980b9;
+        }
+        .cost-highlight {
+            background: #e8f5e8;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #27ae60;
+        }
+        .savings-card {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            border-left: 4px solid #28a745;
+        }
+        .phase-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid #27ae60;
+        }
+        .phase-number {
+            background: #27ae60;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+        }
+        .code-block {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            overflow-x: auto;
+        }
+        ul, ol {
+            margin: 10px 0;
+            padding-left: 25px;
+        }
+        li {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-link">← Back to Analytics Dashboard</a>
+        
+        <h1>💾 GCP Storage Optimization Analysis</h1>
+        
+        <div class="cost-highlight">
+            <h2>Executive Summary</h2>
+            <p>Based on the analysis of your AIComm Inspection project, here's a comprehensive overview of GCP storage usage and cost optimization opportunities. The project uses Firebase Storage for document management and Cloud Storage for automated backups.</p>
+            
+            <h3>Current Storage Configuration</h3>
+            <ul>
+                <li><strong>Primary Storage</strong>: Firebase Storage (aicomm-insp.appspot.com)</li>
+                <li><strong>Backup Storage</strong>: Cloud Storage (gs://aicomm_insp_backup)</li>
+                <li><strong>Additional Buckets</strong>: 20+ buckets identified (many Cloud Functions related)</li>
+                <li><strong>Estimated Monthly Cost</strong>: $15-25/month (storage) + $5-10/month (backup) + $10-15/month (Cloud Functions)</li>
+                <li><strong>Optimization Potential</strong>: 40-60% cost reduction</li>
+            </ul>
+        </div>
+
+        <h2>1. Current Storage Usage Analysis</h2>
+        
+        <h3>1.1 Firebase Storage Bucket (aicomm-insp.appspot.com)</h3>
+        <ul>
+            <li><strong>Purpose</strong>: Main application storage</li>
+            <li><strong>Location</strong>: EU (multi-region)</li>
+            <li><strong>Storage Class</strong>: STANDARD</li>
+            <li><strong>Usage</strong>: PDF templates, signatures, documents, reports</li>
+        </ul>
+
+        <h4>File Types & Sizes</h4>
+        <ul>
+            <li><strong>PDFs</strong>: Templates (~50KB), Reports (~500KB-2MB)</li>
+            <li><strong>Images</strong>: Signatures (~100KB), Photos (~500KB-2MB)</li>
+            <li><strong>Documents</strong>: Various formats (~100KB-1MB)</li>
+        </ul>
+
+        <h3>1.2 Cloud Storage Buckets Analysis</h3>
+        
+        <h4>Primary Application Buckets</h4>
+        <ul>
+            <li><strong>Firebase Storage</strong> (aicomm-insp.appspot.com) - Main application storage</li>
+            <li><strong>Backup Storage</strong> (gs://aicomm_insp_backup) - Firestore database backups</li>
+            <li><strong>Additional Backup</strong> (gs://firestore_backup_flow) - Additional Firestore backup</li>
+            <li><strong>Staging Storage</strong> (gs://staging.aicomm-insp.appspot.com) - Staging environment storage</li>
+        </ul>
+
+        <h4>Cloud Functions Storage Buckets (12 buckets)</h4>
+        <ul>
+            <li><strong>Function Sources (6 buckets)</strong>: Across multiple regions</li>
+            <li><strong>Function Uploads (6 buckets)</strong>: With 1-day lifecycle policies</li>
+        </ul>
+
+        <h4>Cloud Run Storage Buckets (2 buckets)</h4>
+        <ul>
+            <li>run-sources-aicomm-insp-europe-west3</li>
+            <li>run-sources-aicomm-insp-us-central1</li>
+        </ul>
+
+        <h4>Artifact Registry Buckets (2 buckets)</h4>
+        <ul>
+            <li>eu.artifacts.aicomm-insp.appspot.com</li>
+            <li>us.artifacts.aicomm-insp.appspot.com</li>
+        </ul>
+
+        <h2>2. Cost Analysis</h2>
+        
+        <h3>2.1 Current Storage Costs</h3>
+        
+        <h4>Firebase Storage Costs</h4>
+        <ul>
+            <li><strong>Standard Storage</strong>: $0.020/GB/month</li>
+            <li><strong>Operations</strong>: $0.05/10,000 operations</li>
+            <li><strong>Data Transfer</strong>: $0.12/GB (egress)</li>
+        </ul>
+
+        <h4>Cloud Storage Backup Costs</h4>
+        <ul>
+            <li><strong>Standard Storage</strong>: $0.020/GB/month</li>
+            <li><strong>Operations</strong>: $0.05/10,000 operations</li>
+            <li><strong>Data Transfer</strong>: $0.12/GB (egress)</li>
+        </ul>
+
+        <h4>Estimated Monthly Breakdown</h4>
+        <ul>
+            <li><strong>Firebase Storage</strong>: $5-10/month (main application data)</li>
+            <li><strong>Backup Storage</strong>: $3-6/month (multiple backup buckets)</li>
+            <li><strong>Cloud Functions Storage</strong>: $8-12/month (12 function buckets)</li>
+            <li><strong>Cloud Run Storage</strong>: $2-4/month (2 run buckets)</li>
+            <li><strong>Artifact Registry</strong>: $2-3/month (2 artifact buckets)</li>
+            <li><strong>Operations</strong>: $3-5/month (read/write operations)</li>
+            <li><strong>Total</strong>: $23-40/month</li>
+        </ul>
+
+        <h2>3. Optimization Strategies</h2>
+        
+        <h3>3.1 Immediate Optimizations (40-50% cost reduction)</h3>
+        
+        <h4>1. Implement Storage Lifecycle Policies</h4>
+        <div class="code-block">
+{
+  "lifecycle": {
+    "rule": [
+      {
+        "action": {"type": "SetStorageClass", "storageClass": "NEARLINE"},
+        "condition": {
+          "age": 30,
+          "matchesStorageClass": ["STANDARD"]
+        }
+      },
+      {
+        "action": {"type": "SetStorageClass", "storageClass": "COLDLINE"},
+        "condition": {
+          "age": 90,
+          "matchesStorageClass": ["NEARLINE"]
+        }
+      },
+      {
+        "action": {"type": "Delete"},
+        "condition": {
+          "age": 365,
+          "matchesStorageClass": ["COLDLINE"]
+        }
+      }
+    ]
+  }
+}
+        </div>
+
+        <h4>2. Optimize Backup Strategy</h4>
+        <ul>
+            <li><strong>Current Issue</strong>: Multiple backup buckets consuming resources</li>
+            <li><strong>Solution</strong>: Consolidate to single backup strategy</li>
+            <li><strong>Implementation</strong>: Use single bucket with proper lifecycle policies</li>
+            <li><strong>Cost Impact</strong>: 30-50% reduction in backup costs</li>
+        </ul>
+
+        <h4>3. Regional Consolidation</h4>
+        <ul>
+            <li><strong>Current Issue</strong>: Functions across 4 regions</li>
+            <li><strong>Solution</strong>: Consolidate to europe-west3</li>
+            <li><strong>Benefits</strong>: Reduced cross-region data transfer costs</li>
+            <li><strong>Cost Impact</strong>: 20-30% reduction</li>
+        </ul>
+
+        <h3>3.2 Medium-term Optimizations (20-30% additional savings)</h3>
+        
+        <h4>1. Implement Intelligent Caching</h4>
+        <ul>
+            <li><strong>Strategy</strong>: Multi-level caching for frequently accessed files</li>
+            <li><strong>Implementation</strong>: CDN integration, browser caching</li>
+            <li><strong>Benefits</strong>: Reduced storage operations, faster access</li>
+        </ul>
+
+        <h4>2. Image Optimization</h4>
+        <ul>
+            <li><strong>Strategy</strong>: Automatic image compression and resizing</li>
+            <li><strong>Implementation</strong>: Cloud Functions for image processing</li>
+            <li><strong>Benefits</strong>: Reduced storage volume, faster loading</li>
+        </ul>
+
+        <h3>3.3 Cloud Functions Storage Optimization (20-30% additional savings)</h3>
+        
+        <h4>1. Consolidate Function Buckets</h4>
+        <ul>
+            <li><strong>Current Issue</strong>: 12+ Cloud Functions buckets across multiple regions</li>
+            <li><strong>Solution</strong>: Consolidate to single region with proper lifecycle policies</li>
+            <li><strong>Cost Impact</strong>: 40-60% reduction in Cloud Functions storage costs</li>
+        </ul>
+
+        <h4>2. Optimize Function Lifecycle Policies</h4>
+        <div class="code-block">
+{
+  "lifecycle": {
+    "rule": [
+      {
+        "action": {"type": "Delete"},
+        "condition": {
+          "age": 1,
+          "matchesStorageClass": ["STANDARD"]
+        }
+      },
+      {
+        "action": {"type": "SetStorageClass", "storageClass": "NEARLINE"},
+        "condition": {
+          "age": 7,
+          "matchesStorageClass": ["STANDARD"]
+        }
+      }
+    ]
+  }
+}
+        </div>
+
+        <h2>4. Implementation Roadmap</h2>
+        
+        <div class="phase-card">
+            <h3><span class="phase-number">1</span>Phase 1: Critical Fixes (Week 1)</h3>
+            <ul>
+                <li>Remove test bucket (gs://recovert_test)</li>
+                <li>Consolidate function regions to europe-west3</li>
+                <li>Implement 1-day lifecycle policy for upload buckets</li>
+                <li>Review and potentially remove old backup (gs://firestore_backup_flow)</li>
+            </ul>
+            <p><strong>Expected Savings:</strong> 35-40% cost reduction</p>
+        </div>
+
+        <div class="phase-card">
+            <h3><span class="phase-number">2</span>Phase 2: Performance Optimization (Week 2-3)</h3>
+            <ul>
+                <li>Implement storage lifecycle policies</li>
+                <li>Optimize backup strategy</li>
+                <li>Implement image optimization</li>
+                <li>Set up monitoring and alerting</li>
+            </ul>
+            <p><strong>Expected Savings:</strong> 20-30% additional reduction</p>
+        </div>
+
+        <div class="phase-card">
+            <h3><span class="phase-number">3</span>Phase 3: Advanced Optimizations (Week 4+)</h3>
+            <ul>
+                <li>Implement intelligent caching</li>
+                <li>Set up automated optimization</li>
+                <li>Implement cost monitoring dashboards</li>
+                <li>Optimize data transfer patterns</li>
+            </ul>
+            <p><strong>Expected Savings:</strong> 10-20% additional reduction</p>
+        </div>
+
+        <h2>5. Expected Cost Savings</h2>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>Phase</th>
+                    <th>Current Cost</th>
+                    <th>Optimized Cost</th>
+                    <th>Savings</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Phase 1</td>
+                    <td>$23-40/month</td>
+                    <td>$15-25/month</td>
+                    <td>35-40%</td>
+                </tr>
+                <tr>
+                    <td>Phase 2</td>
+                    <td>$15-25/month</td>
+                    <td>$12-20/month</td>
+                    <td>20-30%</td>
+                </tr>
+                <tr>
+                    <td>Phase 3</td>
+                    <td>$12-20/month</td>
+                    <td>$8-15/month</td>
+                    <td>10-20%</td>
+                </tr>
+                <tr>
+                    <td><strong>Total</strong></td>
+                    <td><strong>$23-40/month</strong></td>
+                    <td><strong>$8-15/month</strong></td>
+                    <td><strong>65-75%</strong></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="savings-card">
+            <h3>💰 Overall Projected Savings</h3>
+            <ul>
+                <li><strong>Current Cost</strong>: $23-40/month</li>
+                <li><strong>After Phase 1</strong>: $15-25/month (35-40% reduction)</li>
+                <li><strong>After Phase 2</strong>: $12-20/month (50-55% reduction)</li>
+                <li><strong>After Phase 3</strong>: $8-15/month (65-75% reduction)</li>
+            </ul>
+        </div>
+
+        <h2>6. Risk Assessment</h2>
+        
+        <h3>Implementation Risks</h3>
+        <ul>
+            <li><strong>Low Risk</strong>: Lifecycle policy implementation, test bucket removal</li>
+            <li><strong>Medium Risk</strong>: Regional consolidation, backup strategy changes</li>
+            <li><strong>High Risk</strong>: Critical function storage changes</li>
+        </ul>
+
+        <h3>Mitigation Strategies</h3>
+        <ul>
+            <li>Gradual implementation over multiple weeks</li>
+            <li>Test all changes in development first</li>
+            <li>Prepare rollback procedures for critical changes</li>
+            <li>Implement comprehensive monitoring</li>
+            <li>Document all changes and procedures</li>
+        </ul>
+
+        <h2>7. Monitoring and Metrics</h2>
+        
+        <h3>Key Metrics to Track</h3>
+        <ul>
+            <li><strong>Storage Volume</strong>: Total data stored across all buckets</li>
+            <li><strong>Storage Classes</strong>: Distribution across STANDARD, NEARLINE, COLDLINE</li>
+            <li><strong>Operations</strong>: Read/write operation counts</li>
+            <li><strong>Cost Trends</strong>: Monthly cost tracking</li>
+            <li><strong>Access Patterns</strong>: File access frequency and patterns</li>
+        </ul>
+
+        <h3>Monitoring Setup</h3>
+        <div class="code-block">
+# Set up cost monitoring
+gcloud monitoring metrics list --filter="resource.type=storage"
+
+# Set up storage monitoring
+gcloud monitoring dashboards create --config-from-file=storage-dashboard.json
+
+# Set up alerting
+gcloud alpha monitoring policies create --policy-from-file=storage-alerts.yaml
+        </div>
+
+        <h2>8. Conclusion</h2>
+        
+        <p>The GCP storage analysis reveals significant optimization opportunities with 65-75% cost reduction potential. The implementation roadmap provides a systematic approach to achieving these savings while maintaining system stability and performance.</p>
+        
+        <p><strong>Priority Actions:</strong></p>
+        <ol>
+            <li>Remove test buckets and consolidate regions</li>
+            <li>Implement storage lifecycle policies</li>
+            <li>Optimize backup strategy</li>
+            <li>Set up monitoring and cost tracking</li>
+            <li>Implement automated optimization</li>
+        </ol>
+
+        <p><strong>Expected Timeline:</strong> 4-6 weeks for complete implementation</p>
+        <p><strong>Expected ROI:</strong> $15-25/month savings with minimal implementation risk</p>
+
+        <hr>
+        <p><em>Analysis Date: January 2025 | Storage Optimization Analysis | Expected Savings: 65-75% cost reduction</em></p>
+    </div>
+</body>
+</html>
