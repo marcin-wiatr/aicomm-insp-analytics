@@ -35,13 +35,14 @@ This is a comprehensive field service management application for inspection and 
 ```
 ├── users/                    # User management
 ├── clients/                  # Client/customer data
+│   ├── systems/              # Equipment/systems (subcollection)
+│   └── offers/               # Service offers (subcollection)
 ├── orders/                   # Service orders
-│   ├── inspectionPositions/  # Inspection details
-│   ├── expenses/             # Expense tracking
-│   ├── files/                # Order-related files
-│   └── users_orders/         # User-order assignments
-├── systems/                  # Equipment/systems (subcollection of clients)
-├── offers/                   # Service offers (subcollection of clients)
+│   ├── inspectionPositions/  # Inspection details (subcollection)
+│   ├── expenses/             # Expense tracking (subcollection)
+│   ├── files/                # Order-related files (subcollection)
+│   ├── users_orders/         # User-order assignments (subcollection)
+│   └── ordersPdfData/        # PDF generation data (subcollection)
 ├── organizations/            # Multi-tenant organization data
 ├── parts/                    # Parts inventory
 ├── settings/                 # Application settings
@@ -49,6 +50,7 @@ This is a comprehensive field service management application for inspection and 
 ├── notes/                    # General notes
 ├── chats/                    # Communication
 ├── chat_messages/            # Chat messages
+├── financial_periods/        # Financial management
 └── ff_push_notifications/    # Push notification queue
 ```
 

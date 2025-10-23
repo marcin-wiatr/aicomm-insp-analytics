@@ -28,16 +28,20 @@ This document consolidates all analysis findings for the AIComm Inspection Flutt
 **Active Collections:**
 - `users` (15 documents) - User management
 - `orders` (50+ documents) - Order processing
+  - `inspectionPositions` (subcollection) - Inspection details
+  - `expenses` (subcollection) - Expense tracking  
+  - `files` (subcollection) - Order-related files
+  - `users_orders` (subcollection) - User-order assignments
+  - `ordersPdfData` (subcollection) - PDF generation data
 - `clients` (25+ documents) - Client management
-- `expenses` (100+ documents) - Expense tracking
+  - `systems` (subcollection) - Equipment/systems
+  - `offers` (subcollection) - Service offers
 - `settings` (1 document) - System configuration
 - `templates` (10+ documents) - Report templates
 - `parts` (20+ documents) - Parts management
 - `notes` (5+ documents) - System notes
 - `organizations` (1 document) - Organization data
 - `financial_periods` (5+ documents) - Financial management
-- `offers` (15+ documents) - Offer management
-- `systems` (30+ documents) - System configurations
 - `chats` (5+ documents) - Communication
 - `chat_messages` (20+ documents) - Chat history
 - `user_items` (10+ documents) - User-specific items
